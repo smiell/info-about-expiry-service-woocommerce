@@ -7,7 +7,7 @@
  */
 
 // Dodaj przycisk do strony edycji zamówienia
-function add_custom_thank_you_button() {
+function zhngrupa_send_message_button() {
     global $post;
 
     // Sprawdź, czy to strona edycji zamówienia i czy użytkownik jest administratorem
@@ -23,7 +23,7 @@ function add_custom_thank_you_button() {
         $order_id = isset($_GET['post']) ? absint($_GET['post']) : 0;
 
         // Sprawdź, czy e-mail został już wysłany
-        $email_sent = get_post_meta($order_id, '_custom_thank_you_email_sent', true);
+        $email_sent = get_post_meta($order_id, '_zhngrupa_expired_service_message_sent', true);
 
         // Jeśli e-mail został wysłany, zablokuj przycisk
         $button_disabled = $email_sent ? 'disabled' : '';
@@ -32,19 +32,19 @@ function add_custom_thank_you_button() {
         $button_text = $email_sent ? 'Wiadomość o zakończeniu usługi została wysłana' : 'Wyślij wiadomość';
 
         // Dodaj przycisk
-        echo '<button id="custom_thank_you_button" class="button button-primary" ' . $button_disabled . '>' . $button_text . '</button>';
+        echo '<button id="zhngrupa_send_message_expiry_service" class="button button-primary" ' . $button_disabled . '>' . $button_text . '</button>';
     }
 }
-add_action('woocommerce_order_item_add_action_buttons', 'add_custom_thank_you_button', 20);
+add_action('woocommerce_order_item_add_action_buttons', 'zhngrupa_send_message_button', 20);
 
 // Sprawdź uprawnienia do akcji AJAX
-function check_custom_thank_you_status() {
+function zhngrupa_check_send_message_button_status() {
     $post_id = isset($_POST['post_id']) ? absint($_POST['post_id']) : 0;
     $order = wc_get_order($post_id);
 
     // Sprawdź, czy użytkownik ma uprawnienia do edycji zamówienia
     if (current_user_can('manage_options') && $order) {
-        $email_sent = get_post_meta($post_id, '_custom_thank_you_email_sent', true);
+        $email_sent = get_post_meta($post_id, '_zhngrupa_expired_service_message_sent', true);
 
         // Przesyłamy informację o statusie do JavaScript
         wp_send_json_success(array('sent' => $email_sent));
@@ -53,14 +53,14 @@ function check_custom_thank_you_status() {
     }
 }
 
-add_action('wp_ajax_check_custom_thank_you_status', 'check_custom_thank_you_status');
+add_action('wp_ajax_zhngrupa_check_send_message_button_status', 'zhngrupa_check_send_message_button_status');
 
-function custom_thank_you_button_script() {
+function zhngrupa_send_message_button_script() {
     ?>
     <script>
         jQuery(document).ready(function($) {
-            var customThankYouButton = $('#custom_thank_you_button');
-            var nonce = '<?php echo wp_create_nonce('custom_thank_you_nonce'); ?>';
+            var zhngrupaSendMessageExpiredService = $('#zhngrupa_send_message_expiry_service');
+            var nonce = '<?php echo wp_create_nonce('zhngrupa_expired_service_nonce'); ?>';
             var order_id = $('#post_ID').val();
 
             // Sprawdź, czy wiadomość została już wysłana
@@ -68,37 +68,37 @@ function custom_thank_you_button_script() {
                 type: 'POST',
                 url: ajaxurl,
                 data: {
-                    action: 'check_custom_thank_you_status',
+                    action: 'zhngrupa_check_send_message_button_status',
                     nonce: nonce,
                     post_id: order_id
                 },
                 success: function(response) {
                     if (response.success && response.data.sent) {
                         // Wiadomość została wysłana wcześniej, zablokuj przycisk
-                        customThankYouButton.prop('disabled', true);
-                        customThankYouButton.text('Wiadomość o zakończeniu usługi została wysłana');
+                        zhngrupaSendMessageExpiredService.prop('disabled', true);
+                        zhngrupaSendMessageExpiredService.text('Wiadomość o zakończeniu usługi została wysłana');
                     }
                 }
             });
 
             // Obsługa kliknięcia przycisku
-            customThankYouButton.click(function() {
+            zhngrupaSendMessageExpiredService.click(function() {
                 // Sprawdź, czy przycisk jest zablokowany
-                if (!customThankYouButton.prop('disabled')) {
+                if (!zhngrupaSendMessageExpiredService.prop('disabled')) {
                     // Zablokuj przycisk po kliknięciu
-                    customThankYouButton.prop('disabled', true);
+                    zhngrupaSendMessageExpiredService.prop('disabled', true);
 
                     // Wyślij żądanie do serwera, aby obsłużyć kliknięcie przycisku
                     $.post(ajaxurl, {
-                        action: 'send_custom_thank_you_email',
+                        action: 'zhngrupa_send_message_ExpiredService',
                         nonce: nonce,
                         post_id: order_id
                     }, function(response) {
                         console.log(response);
                         if (response.success) {
                             // Wiadomość została poprawnie wysłana, zablokuj przycisk i zmień jego treść
-                            customThankYouButton.prop('disabled', true);
-                            customThankYouButton.text('Wiadomość o zakończeniu usługi została wysłana');
+                            zhngrupaSendMessageExpiredService.prop('disabled', true);
+                            zhngrupaSendMessageExpiredService.text('Wiadomość o zakończeniu usługi została wysłana');
                             alert("Wiadomość została poprawnie wysłana.");
                         } else {
                             // Błąd podczas wysyłania wiadomości
@@ -111,16 +111,16 @@ function custom_thank_you_button_script() {
     </script>
     <?php
 }
-add_action('admin_footer', 'custom_thank_you_button_script');
+add_action('admin_footer', 'zhngrupa_send_message_button_script');
 
-function send_custom_thank_you_email() {
-    check_ajax_referer('custom_thank_you_nonce', 'nonce');
+function zhngrupa_send_message_ExpiredService() {
+    check_ajax_referer('zhngrupa_expired_service_nonce', 'nonce');
 
     $post_id = isset($_POST['post_id']) ? absint($_POST['post_id']) : 0;
     $order = wc_get_order($post_id);
 
     if ($order) {
-        $email_sent = get_post_meta($post_id, '_custom_thank_you_email_sent', true);
+        $email_sent = get_post_meta($post_id, '_zhngrupa_expired_service_message_sent', true);
 
         $current_date = date('d-m-Y');
 
@@ -136,8 +136,8 @@ function send_custom_thank_you_email() {
             $email_sent_result = wp_mail($customer_email, $subject, $message, $headers);
 
             if ($email_sent_result) {
-                update_post_meta($post_id, '_custom_thank_you_email_sent', true);
-                update_post_meta($post_id, '_custom_thank_you_button_disabled', true);
+                update_post_meta($post_id, '_zhngrupa_expired_service_message_sent', true);
+                update_post_meta($post_id, '_zhngrupa_expired_service_button_disabled', true);
 
                 wp_send_json_success('Email sent successfully.');
             } else {
@@ -150,4 +150,4 @@ function send_custom_thank_you_email() {
         wp_send_json_error('Error getting order.');
     }
 }
-add_action('wp_ajax_send_custom_thank_you_email', 'send_custom_thank_you_email');
+add_action('wp_ajax_zhngrupa_send_message_ExpiredService', 'zhngrupa_send_message_ExpiredService');

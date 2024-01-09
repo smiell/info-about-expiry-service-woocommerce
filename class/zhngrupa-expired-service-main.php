@@ -123,8 +123,12 @@ class Zhngrupa_Expired_Service {
                     update_post_meta($post_id, '_zhngrupa_expired_service_message_sent', true);
                     update_post_meta($post_id, '_zhngrupa_expired_service_button_disabled', true);
 
+                    // Add note in order
+                    $order->add_order_note('Expired service: Customer notified about expired service through e-mail.');
+
                     wp_send_json_success('Email sent successfully.');
                 } else {
+                    $order->add_order_note('Expired service: Fail: Sending failed.');
                     wp_send_json_error('Email sending failed.');
                 }
             } else {

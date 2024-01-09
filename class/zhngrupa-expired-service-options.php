@@ -23,12 +23,12 @@ class ZhnGrupa_Expired_Service_Options {
 		[
 			'id' => 'messageTitle',
 			'label' => 'Email message title',
-			'description' => 'Set message title wchih be sent',
+			'description' => 'Message title',
 			'type' => 'text',
 		],
         [
 			'id' => 'messageContent',
-			'label' => 'Message content (HTML)',
+			'label' => 'Message template (HTML)',
 			'description' => 'Message content to sent',
 			'type' => 'wysiwyg',
 		],

@@ -6,8 +6,10 @@
  * Author: ZHNGRUPA
  */
 
-// Include the main class file
-require_once plugin_dir_path(__FILE__) . 'class/zhngrupa-expired-service.php';
+// Include the main classes files
+require_once plugin_dir_path(__FILE__) . 'class/zhngrupa-expired-service-main.php';
+require_once plugin_dir_path(__FILE__) . 'class/zhngrupa-expired-service-options.php';
 
 // Instantiate the main class
 $zhngrupa_expired_service = new Zhngrupa_Expired_Service();
+$zhngrupa_expired_service_options = new ZhnGrupa_Expired_Service_Options();

@@ -2,9 +2,9 @@ jQuery(document).ready(function($) {
     var order_id = zhngrupaScriptParams.order_id || 0;
     var nonce = zhngrupaScriptParams.nonce || '';
 
-    console.log('Order ID: ' + order_id);
+    //console.log('Order ID: ' + order_id);
 
-    // Sprawdź, czy wiadomość została już wysłana
+    // Check if the message has already been sent
     $.ajax({
         type: 'POST',
         url: ajaxurl,
@@ -15,22 +15,22 @@ jQuery(document).ready(function($) {
         },
         success: function(response) {
             if (response.success && response.data.sent) {
-                // Wiadomość została wysłana wcześniej, zablokuj przycisk
+                // The message has been sent previously, block the button
                 disableSendMessageButton();
             }
         }
     });
 
-    // Obsługa kliknięcia przycisku
+    // Button click handle
     $('#zhngrupa_send_message_expiry_service').click(function(event) {
-        event.preventDefault(); // Zatrzymaj domyślną akcję przycisku
+        event.preventDefault(); // Stop the button's default action
 
-        // Sprawdź, czy przycisk jest zablokowany
+        // Check if the button is locked
         if (!$(this).prop('disabled')) {
-            // Zablokuj przycisk po kliknięciu
+            // Lock the button when clicked
             $(this).prop('disabled', true);
 
-            // Wyślij żądanie do serwera, aby obsłużyć kliknięcie przycisku
+            // Send a request to the server to handle the button click
             $.post(ajaxurl, {
                 action: 'zhngrupa_send_message_ExpiredService',
                 nonce: nonce,
@@ -38,11 +38,11 @@ jQuery(document).ready(function($) {
             }, function(response) {
                 console.log(response);
                 if (response.success) {
-                    // Wiadomość została poprawnie wysłana, zablokuj przycisk i zmień jego treść
+                    // The message has been successfully sent, lock the button and change its content
                     disableSendMessageButton();
                     alert("Wiadomość została poprawnie wysłana.");
                 } else {
-                    // Błąd podczas wysyłania wiadomości
+                    // Error sending message
                     alert("Błąd: " + response.data);
                 }
             });
@@ -51,7 +51,7 @@ jQuery(document).ready(function($) {
 
     function disableSendMessageButton() {
         if (typeof zhngrupaSendMessageExpiredService !== 'undefined') {
-            // Sprawdź, czy przycisk istnieje przed dodaniem obsługi zdarzeń
+            // Check if the button exists before adding event handlers
             zhngrupaSendMessageExpiredService.prop('disabled', true);
             zhngrupaSendMessageExpiredService.text('Wiadomość o zakończeniu usługi została wysłana');
         }

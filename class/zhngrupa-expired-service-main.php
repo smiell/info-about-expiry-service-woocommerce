@@ -95,11 +95,25 @@ class Zhngrupa_Expired_Service {
             $current_date = date('d-m-Y');
 
             if (!$email_sent) {
+
+                $options = get_option( 'zhngrupa_expired_service' );
+
+                // handle empty plugin configuration
+                if( empty( $options['messageTitle'] ) || empty( $options['messageContent'] ) ) {
+                    wp_send_json_error('Please, before setup plugin configuration.');
+                    return 'Please, before setup plugin configuration.';
+                }
+
                 $customer_email = $order->get_billing_email();
                 $customer_name = $order->get_billing_first_name() ? $order->get_billing_first_name() : '';
 
-                $subject = '🎵 Ważne: Zakończenie Usługi Spotify Premium - Odbierz Rabat na Nowy Zakup! 🎉';
-                $message = "Cześć $customer_name,<br />Dziękujemy za skorzystanie ze naszych usług! <br />Niestety Twój plan został zakończony <b>$current_date</b> zgodnie z Twoim zamówieniem.<br />Już dziś możesz skorzystać z specjalnej zniżki dla ciebie!";
+                $subject = $options['messageTitle'];
+                //$message = "Cześć $customer_name,<br />Dziękujemy za skorzystanie ze naszych usług! <br />Niestety Twój plan został zakończony <b>$current_date</b> zgodnie z Twoim zamówieniem.<br />Już dziś możesz skorzystać z specjalnej zniżki dla ciebie!";
+                $message = $options['messageContent'];
+
+                // Replace own variables in the message
+                $message = str_replace('%customer_name%', $customer_name, $message); // Customer name
+                $message = str_replace('%date%', $current_date, $message); // Actual date DD-MM-YY
 
                 $headers[] = 'Content-Type: text/html; charset=UTF-8';
 

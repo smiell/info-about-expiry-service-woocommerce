@@ -23,7 +23,7 @@ class ZhnGrupa_Expired_Service_Options {
 		[
 			'id' => 'messageTitle',
 			'label' => 'Email message title',
-			'description' => 'Message title',
+			'description' => 'Message title. You can use dynamic variables here. For example: %customer_name% See below message content editor.:',
 			'type' => 'text',
 		],
         [
@@ -41,13 +41,13 @@ class ZhnGrupa_Expired_Service_Options {
         [
 			'id' => 'discountCodeAmount',
 			'label' => 'Amount of discount code',
-			'description' => 'for example.: 15% (DO NOT PUT % character here), only amount',
+			'description' => 'for example.: 15% (DO NOT PUT % character here), only amount. If empty coupon will be valid lifetime.',
 			'type' => 'text',
 		],
         [
 			'id' => 'couponValidInDays',
 			'label' => 'How many days coupon should be valid',
-			'description' => 'From today date. for example.: 7 (DAYS) ONLY Integer',
+			'description' => 'From today date. for example.: 7 (DAYS) ONLY Integer. If empty coupon will be valid lifetime.',
 			'type' => 'text',
 		],
 	];
@@ -258,6 +258,11 @@ class ZhnGrupa_Expired_Service_Options {
                 <li><strong>%date%</strong> - which be replaced by actuall date DD-MM-YY</li>
                 <li><strong>%coupon%</strong> - which be replaced by generated discount code when enabled</li>
                 <li><strong>%coupon_amount%</strong> - which be replaced by generated discount code amount when enabled</li>
+                <li><strong>%order_id%</strong> - which be replaced by order ID</li>
+                ';
+                echo 'You can use these parameters in message Title:
+                <li><strong>%customer_name%</strong> - which be replaced with customer first name</li>
+                <li><strong>%order_id%</strong> - which be replaced by order ID</li>
                 ';
 				break;
 			}

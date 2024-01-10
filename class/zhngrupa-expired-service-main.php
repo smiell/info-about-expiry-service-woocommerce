@@ -108,19 +108,25 @@ class Zhngrupa_Expired_Service {
                 $customer_name = $order->get_billing_first_name() ? $order->get_billing_first_name() : '';
 
                 // Should add generated coupon code
-                if( isset($options['enableCuponGeneration']) ) {
+                if( isset($options['enableCuponGeneration']) && isset($options['discountCodeAmount']) ) {
                     // Add coupon code
                     $couponReadyToSend = $this->create_coupon_code( $options['discountCodeAmount'], $options['couponValidInDays'] );
                 }
 
                 $subject = $options['messageTitle'];
                 $message = $options['messageContent'];
+                
+                // Replace own variables in the message Title
+                $subject = str_replace('%customer_name%', $customer_name, $subject); // Customer name
+                $subject = str_replace('%order_id%', $order->get_id(), $subject); // Order ID
 
-                // Replace own variables in the message
+                // Replace own variables in the message content
                 $message = str_replace('%customer_name%', $customer_name, $message); // Customer name
                 $message = str_replace('%date%', $current_date, $message); // Actual date DD-MM-YY
-                $message = str_replace('%coupon%', $couponReadyToSend, $message); // Discount coupon to send
-                $message = str_replace('%coupon_amount%', $options['discountCodeAmount'], $message); // Amount of discount coupon
+                $message = str_replace('%coupon%', strtoupper($couponReadyToSend), $message); // Discount coupon to send
+                $message = str_replace('%coupon_amount%', intval($options['discountCodeAmount']), $message); // Amount of discount coupon
+                $message = str_replace('%order_id%', $order->get_id(), $message); // Order ID
+
 
                 $headers[] = 'Content-Type: text/html; charset=UTF-8';
 
@@ -132,8 +138,8 @@ class Zhngrupa_Expired_Service {
 
                     // If coupon generation enabled, add to order note genearted coupon and his amount
                     if( isset($options['enableCuponGeneration']) ) {
-                        $order->add_order_note('Expired service: Customer notified about expired service through e-mail. Genearted coupon: '.$couponReadyToSend.' Amount: '.$options['discountCodeAmount'].'%');
-                        wp_send_json_success('Email sent successfully. Genearted coupon: '.$couponReadyToSend.' Amount: '.$options['discountCodeAmount'].'%');
+                        $order->add_order_note('Expired service: Customer notified about expired service through e-mail. Genearted coupon: '.$couponReadyToSend.' Amount: '.intval($options['discountCodeAmount']).'%');
+                        wp_send_json_success('Email sent successfully. Genearted coupon: '.$couponReadyToSend.' Amount: '.intval($options['discountCodeAmount']).'%');
                     }
                     else {
                         // Add note in order
@@ -167,19 +173,21 @@ class Zhngrupa_Expired_Service {
     public function create_coupon_code($couponAmount, $daysOfCouponValid) {
         // Set X days valid coupon from actual date
         $current_date = date('d-m-Y');
-
-        // if( !is_int($daysOfCouponValid) ) {
-        //     //If provided days not integer, show error
-        //     error_log('Przyszły dni: '.$daysOfCouponValid);
-        //     wp_send_json_error('Coupon days which was provided is not Integer. Check Plugin configuration and come back.');
-        // }
         
-        // Try to convert value to int
-        $daysOfCouponValid = intval($daysOfCouponValid);
-    
-        // Create timestamp for x days bigger from now date
-        $timestampNow = time();
-        $expiry_date = strtotime("+$daysOfCouponValid days", $timestampNow);
+        // If DaysOfCouponValid is empty, generate lifetime coupon
+        $options = get_option( 'zhngrupa_expired_service' );
+        if( !empty($options['couponValidInDays']) ) {
+            // Try to convert value to int
+            $daysOfCouponValid = intval($daysOfCouponValid);
+        
+            // Create timestamp for x days bigger from now date
+            $timestampNow = time();
+            $expiry_date = strtotime("+$daysOfCouponValid days", $timestampNow);
+        }
+        else {
+            // Create lifetime coupon
+            $expiry_date = null;
+        }
     
         $generatedCouponCode = $this->generate_random_coupon_code(10); // Generate coupon code
     
@@ -188,7 +196,7 @@ class Zhngrupa_Expired_Service {
     
             $couponToSend->set_code($generatedCouponCode);
             $couponToSend->set_discount_type('percent');
-            $couponToSend->set_amount($couponAmount);
+            $couponToSend->set_amount(intval($couponAmount));
             $couponToSend->set_individual_use(true);
             $couponToSend->set_usage_limit(1);
 

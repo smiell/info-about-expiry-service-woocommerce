@@ -164,12 +164,22 @@ class Zhngrupa_Expired_Service {
         return $coupon_code;
     }
 
-    public function create_coupon_code($couponAmount, $expiryDate) {
+    public function create_coupon_code($couponAmount, $daysOfCouponValid) {
         // Set X days valid coupon from actual date
         $current_date = date('d-m-Y');
-        $how_many_days = is_int($expiryDate);
+
+        // if( !is_int($daysOfCouponValid) ) {
+        //     //If provided days not integer, show error
+        //     error_log('Przyszły dni: '.$daysOfCouponValid);
+        //     wp_send_json_error('Coupon days which was provided is not Integer. Check Plugin configuration and come back.');
+        // }
+        
+        // Try to convert value to int
+        $daysOfCouponValid = intval($daysOfCouponValid);
     
-        $expiry_date = date('d-m-Y', strtotime($current_date . ' +' . $how_many_days . ' days'));
+        // Create timestamp for x days bigger from now date
+        $timestampNow = time();
+        $expiry_date = strtotime("+$daysOfCouponValid days", $timestampNow);
     
         $generatedCouponCode = $this->generate_random_coupon_code(10); // Generate coupon code
     
@@ -181,7 +191,8 @@ class Zhngrupa_Expired_Service {
             $couponToSend->set_amount($couponAmount);
             $couponToSend->set_individual_use(true);
             $couponToSend->set_usage_limit(1);
-            $couponToSend->set_date_expires(strtotime($expiry_date));
+
+            $couponToSend->set_date_expires($expiry_date);
     
             // Save new coupon
             $coupon_iD = $couponToSend->save();

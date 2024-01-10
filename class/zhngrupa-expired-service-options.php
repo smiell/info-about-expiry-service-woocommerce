@@ -47,7 +47,7 @@ class ZhnGrupa_Expired_Service_Options {
         [
 			'id' => 'couponValidInDays',
 			'label' => 'How many days coupon should be valid',
-			'description' => 'for example.: 7 (DAYS) ONLY Integer',
+			'description' => 'From today date. for example.: 7 (DAYS) ONLY Integer',
 			'type' => 'text',
 		],
 	];

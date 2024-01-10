@@ -76,7 +76,7 @@ class Zhngrupa_Expired_Service {
             'order_id' => $order_id,
         ));
 
-        error_log( 'Order ID w enylowaniu js: ' . $order_id );
+        //error_log( 'Order ID in enqueueing js: ' . $order_id );
     }
 
     // Method to send the expired service message
@@ -107,13 +107,20 @@ class Zhngrupa_Expired_Service {
                 $customer_email = $order->get_billing_email();
                 $customer_name = $order->get_billing_first_name() ? $order->get_billing_first_name() : '';
 
+                // Should add generated coupon code
+                if( isset($options['enableCuponGeneration']) ) {
+                    // Add coupon code
+                    $couponReadyToSend = $this->create_coupon_code( $options['discountCodeAmount'], $options['couponValidInDays'] );
+                }
+
                 $subject = $options['messageTitle'];
-                //$message = "Cześć $customer_name,<br />Dziękujemy za skorzystanie ze naszych usług! <br />Niestety Twój plan został zakończony <b>$current_date</b> zgodnie z Twoim zamówieniem.<br />Już dziś możesz skorzystać z specjalnej zniżki dla ciebie!";
                 $message = $options['messageContent'];
 
                 // Replace own variables in the message
                 $message = str_replace('%customer_name%', $customer_name, $message); // Customer name
                 $message = str_replace('%date%', $current_date, $message); // Actual date DD-MM-YY
+                $message = str_replace('%coupon%', $couponReadyToSend, $message); // Discount coupon to send
+                $message = str_replace('%coupon_amount%', $options['discountCodeAmount'], $message); // Amount of discount coupon
 
                 $headers[] = 'Content-Type: text/html; charset=UTF-8';
 
@@ -123,10 +130,17 @@ class Zhngrupa_Expired_Service {
                     update_post_meta($post_id, '_zhngrupa_expired_service_message_sent', true);
                     update_post_meta($post_id, '_zhngrupa_expired_service_button_disabled', true);
 
-                    // Add note in order
-                    $order->add_order_note('Expired service: Customer notified about expired service through e-mail.');
+                    // If coupon generation enabled, add to order note genearted coupon and his amount
+                    if( isset($options['enableCuponGeneration']) ) {
+                        $order->add_order_note('Expired service: Customer notified about expired service through e-mail. Genearted coupon: '.$couponReadyToSend.' Amount: '.$options['discountCodeAmount'].'%');
+                        wp_send_json_success('Email sent successfully. Genearted coupon: '.$couponReadyToSend.' Amount: '.$options['discountCodeAmount'].'%');
+                    }
+                    else {
+                        // Add note in order
+                        $order->add_order_note('Expired service: Customer notified about expired service through e-mail. Genearted coupon: '.$couponReadyToSend.' Amount: '.$options['discountCodeAmount'].'%');
+                        wp_send_json_success('Email sent successfully.');
+                    }
 
-                    wp_send_json_success('Email sent successfully.');
                 } else {
                     $order->add_order_note('Expired service: Fail: Sending failed.');
                     wp_send_json_error('Email sending failed.');
@@ -138,4 +152,49 @@ class Zhngrupa_Expired_Service {
             wp_send_json_error('Error getting order.');
         }
     }
+
+    // Method to generate coupon code
+    public function generate_random_coupon_code($length = 10) {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $coupon_code = '';
+        for ($i = 0; $i < $length; $i++) {
+            $coupon_code .= $characters[rand(0, strlen($characters) - 1)];
+        }
+
+        return $coupon_code;
+    }
+
+    public function create_coupon_code($couponAmount, $expiryDate) {
+        // Set X days valid coupon from actual date
+        $current_date = date('d-m-Y');
+        $how_many_days = is_int($expiryDate);
+    
+        $expiry_date = date('d-m-Y', strtotime($current_date . ' +' . $how_many_days . ' days'));
+    
+        $generatedCouponCode = $this->generate_random_coupon_code(10); // Generate coupon code
+    
+        if (!wc_get_coupon_id_by_code($generatedCouponCode)) {
+            $couponToSend = new WC_Coupon();
+    
+            $couponToSend->set_code($generatedCouponCode);
+            $couponToSend->set_discount_type('percent');
+            $couponToSend->set_amount($couponAmount);
+            $couponToSend->set_individual_use(true);
+            $couponToSend->set_usage_limit(1);
+            $couponToSend->set_date_expires(strtotime($expiry_date));
+    
+            // Save new coupon
+            $coupon_iD = $couponToSend->save();
+    
+            if ($coupon_iD) {
+                return $couponToSend->get_code(); // Return new, generated coupon
+            } else {
+                error_log('ZHNGRUPA Expired Service: Error with generating coupon');
+                return 'ZHNGRUPA Expired Service: Error with generating coupon.';
+            }
+        }
+    }
+
+
+
 }

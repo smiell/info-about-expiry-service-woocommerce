@@ -44,6 +44,12 @@ class ZhnGrupa_Expired_Service_Options {
 			'description' => 'for example.: 15% (DO NOT PUT % character here), only amount',
 			'type' => 'text',
 		],
+        [
+			'id' => 'couponValidInDays',
+			'label' => 'How many days coupon should be valid',
+			'description' => 'for example.: 7 (DAYS) ONLY Integer',
+			'type' => 'text',
+		],
 	];
 
 	/**

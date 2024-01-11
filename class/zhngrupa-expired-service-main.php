@@ -111,6 +111,9 @@ class Zhngrupa_Expired_Service {
                 if( isset($options['enableCuponGeneration']) && isset($options['discountCodeAmount']) ) {
                     // Add coupon code
                     $couponReadyToSend = $this->create_coupon_code( $options['discountCodeAmount'], $options['couponValidInDays'] );
+
+                    // If coupon generation enabled, replace in content message coupon valid to date
+                    $couponExpirationDate_replace = date('Y-m-d', $this->calculate_coupon_expiry_date( $options['couponValidInDays'] ) );
                 }
 
                 $subject = $options['messageTitle'];
@@ -125,6 +128,7 @@ class Zhngrupa_Expired_Service {
                 $message = str_replace('%date%', $current_date, $message); // Actual date DD-MM-YY
                 $message = str_replace('%coupon%', strtoupper($couponReadyToSend), $message); // Discount coupon to send
                 $message = str_replace('%coupon_amount%', intval($options['discountCodeAmount']), $message); // Amount of discount coupon
+                $message = str_replace('%coupon_expiry_date%', $couponExpirationDate_replace, $message); // Amount of discount coupon
                 $message = str_replace('%order_id%', $order->get_id(), $message); // Order ID
 
 
@@ -177,12 +181,13 @@ class Zhngrupa_Expired_Service {
         // If DaysOfCouponValid is empty, generate lifetime coupon
         $options = get_option( 'zhngrupa_expired_service' );
         if( !empty($options['couponValidInDays']) ) {
-            // Try to convert value to int
-            $daysOfCouponValid = intval($daysOfCouponValid);
+            // // Try to convert value to int
+            // $daysOfCouponValid = intval($daysOfCouponValid);
         
-            // Create timestamp for x days bigger from now date
-            $timestampNow = time();
-            $expiry_date = strtotime("+$daysOfCouponValid days", $timestampNow);
+            // // Create timestamp for x days bigger from now date
+            // $timestampNow = time();
+            // $expiry_date = strtotime("+$daysOfCouponValid days", $timestampNow);
+            $expiry_date = $this->calculate_coupon_expiry_date( intval($daysOfCouponValid) );
         }
         else {
             // Create lifetime coupon
@@ -212,6 +217,23 @@ class Zhngrupa_Expired_Service {
                 return 'ZHNGRUPA Expired Service: Error with generating coupon.';
             }
         }
+    }
+
+    public function calculate_coupon_expiry_date($daysOfCouponValid) {
+        // Create timestamp for x days bigger from now date
+        // if( intval( is_int($daysOfCouponValid)) ) {
+            $daysOfCouponValid = intval($daysOfCouponValid);
+
+            $timestampNow = time();
+            $expiry_date = strtotime("+$daysOfCouponValid days", $timestampNow);
+
+            // Return Timestamp value a x days behind actaul date
+            return $expiry_date;
+        // } else {
+            // return 'Data provided is not Integer value.';
+            // wp_send_json_error('Data provided is not Integer value.');
+        // }
+        
     }
 
 

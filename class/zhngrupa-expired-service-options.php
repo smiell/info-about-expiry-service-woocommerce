@@ -258,6 +258,7 @@ class ZhnGrupa_Expired_Service_Options {
                 <li><strong>%date%</strong> - which be replaced by actuall date DD-MM-YY</li>
                 <li><strong>%coupon%</strong> - which be replaced by generated discount code when enabled</li>
                 <li><strong>%coupon_amount%</strong> - which be replaced by generated discount code amount when enabled</li>
+                <li><strong>%coupon_expiry_date%</strong> - which be replaced by generated coupon expiry date, if is not set string "lifetime" will be shown</li>
                 <li><strong>%order_id%</strong> - which be replaced by order ID</li>
                 ';
                 echo 'You can use these parameters in message Title:

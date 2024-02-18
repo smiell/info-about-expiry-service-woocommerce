@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Send info about service expiry
+ * Plugin Name: Expired service manager
  * Description: Send e-mail message to customer to inform about expired service that was bought in order.
- * Version: 1.0
+ * Version: 1.0.1
  * Author: ZHNGRUPA
  */
 

@@ -38,7 +38,7 @@ class Zhngrupa_Expired_Service {
             $button_disabled = $email_sent ? 'disabled' : '';
 
             // Changing the button content depending on the status
-            $button_text = $email_sent ? 'Wiadomość o zakończeniu usługi została wysłana' : 'Wyślij wiadomość';
+            $button_text = $email_sent ? 'Expiry message already sent' : 'Inform customer about expired service';
 
             // Add button in order next to Re-calculate button
             echo '<button id="zhngrupa_send_message_expiry_service" class="button button-primary" ' . $button_disabled . '>' . $button_text . '</button>';

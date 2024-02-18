@@ -50,6 +50,19 @@ class ZhnGrupa_Expired_Service_Options {
 			'description' => 'From today date. for example.: 7 (DAYS) ONLY Integer. If empty coupon will be valid lifetime.',
 			'type' => 'text',
 		],
+		[
+			'id' => 'sendMessageButtonPosition',
+			'label' => 'Send Message button position',
+			'description' => 'Decide where you want to place button "Send Message" on order admin page.',
+			'type' => 'select',
+			'options' => [
+				'woocommerce_order_item_add_action_buttons' => 'woocommerce_order_item_add_action_buttons',
+				'woocommerce_admin_order_data_after_shipping_address' => 'woocommerce_admin_order_data_after_shipping_address',
+				'woocommerce_admin_order_data_after_billing_address' => 'woocommerce_admin_order_data_after_billing_address',
+				'woocommerce_admin_order_item_headers' => 'woocommerce_admin_order_item_headers',
+				'woocommerce_admin_order_item_values' => 'woocommerce_admin_order_item_values',
+			],
+		],
 	];
 
 	/**

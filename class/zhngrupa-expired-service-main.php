@@ -6,8 +6,12 @@ class Zhngrupa_Expired_Service {
     private $order_id;
 
     public function __construct() {
+        // Get position form configuration
+        $options = get_option( 'zhngrupa_expired_service' );
+        $hookPosition = !empty($options['sendMessageButtonPosition']) ? $options['sendMessageButtonPosition'] : 'woocommerce_order_item_add_action_buttons';
+
         // Add actions and filters here
-        add_action('woocommerce_order_item_add_action_buttons', array($this, 'zhngrupa_send_message_button'));
+        add_action($hookPosition, array($this, 'zhngrupa_send_message_button'));
         add_action('wp_ajax_zhngrupa_check_send_message_button_status', array($this, 'zhngrupa_check_send_message_button_status'));
         add_action('wp_ajax_zhngrupa_send_message_ExpiredService', array($this, 'zhngrupa_send_message_ExpiredService'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));

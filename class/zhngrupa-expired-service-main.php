@@ -63,7 +63,7 @@ class Zhngrupa_Expired_Service {
 
     // Method for enqueuing scripts
     public function enqueue_scripts() {
-        // Pobierz ID zamówienia
+        // Get order iD
         $order_id = $this->order_id;
 
         // If the order ID is still 0, please complete the process
@@ -80,7 +80,6 @@ class Zhngrupa_Expired_Service {
             'order_id' => $order_id,
         ));
 
-        //error_log( 'Order ID in enqueueing js: ' . $order_id );
     }
 
     // Method to send the expired service message
@@ -90,8 +89,6 @@ class Zhngrupa_Expired_Service {
         // Recive 'post_id' from Ajax request
         $post_id = isset($_POST['post_id']) ? absint($_POST['post_id']) : 0;
         $order = wc_get_order($post_id);
-
-        //error_log( 'Order ID in sending: ' . $order );
 
         if ($order) {
             $email_sent = get_post_meta($post_id, '_zhngrupa_expired_service_message_sent', true);
@@ -185,12 +182,6 @@ class Zhngrupa_Expired_Service {
         // If DaysOfCouponValid is empty, generate lifetime coupon
         $options = get_option( 'zhngrupa_expired_service' );
         if( !empty($options['couponValidInDays']) ) {
-            // // Try to convert value to int
-            // $daysOfCouponValid = intval($daysOfCouponValid);
-        
-            // // Create timestamp for x days bigger from now date
-            // $timestampNow = time();
-            // $expiry_date = strtotime("+$daysOfCouponValid days", $timestampNow);
             $expiry_date = $this->calculate_coupon_expiry_date( intval($daysOfCouponValid) );
         }
         else {

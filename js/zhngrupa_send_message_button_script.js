@@ -2,8 +2,6 @@ jQuery(document).ready(function($) {
     var order_id = zhngrupaScriptParams.order_id || 0;
     var nonce = zhngrupaScriptParams.nonce || '';
 
-    //console.log('Order ID: ' + order_id);
-
     // Check if the message has already been sent
     $.ajax({
         type: 'POST',
